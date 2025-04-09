@@ -1,0 +1,37 @@
+{
+  "name": "create-pull-request",
+  "version": "1.1.0",
+  "description": "Github Actions that create pull requests",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && ncc build lib//src/index.js",
+    "test": "jest --verbose",
+    "format-check": "npx prettier --check .",
+    "format-write": "npx prettier --write .",
+    "lint": "npx eslint .",
+    "lint-fix": "npx eslint . --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.10",
+    "@vercel/ncc": "^0.38.3",
+    "eslint": "^9.23.0",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.3.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.29.0"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0",
+    "@octokit/request-error": "^6.1.7"
+  }
+}

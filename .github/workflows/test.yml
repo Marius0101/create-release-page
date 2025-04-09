@@ -1,0 +1,17 @@
+name: test
+on:
+    workflow_dispatch:
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./
+              with: 
+                gh-token: ""
+                head: feature/create-action
+                base: develop
+                title: Test PR
+
+                

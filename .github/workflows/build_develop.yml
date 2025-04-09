@@ -1,0 +1,29 @@
+name: Build development
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+  workflow_call:
+jobs:
+  Build_development:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build and lint
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm run test

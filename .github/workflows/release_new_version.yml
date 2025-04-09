@@ -1,0 +1,45 @@
+name: Create new version
+on:
+  workflow_dispatch:
+
+permissions:
+    contents: write
+jobs:
+    Build:
+        uses: ./.github/workflows/build_develop.yml
+    CreateNewTag:
+        needs: Build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+            - name: Read version from package.json
+              id: get_version
+              run: |
+                version=$(jq -r .version package.json)
+                majorVersion=$(echo "$version" | cut -d. -f1)
+                echo "version=$version" >> $GITHUB_OUTPUT
+                echo "majorVersion=$majorVersion" >> $GITHUB_OUTPUT 
+
+            - name: Configure user
+              run: | 
+                git config user.name "github-actions"
+                git config user.email "github-actions@github.com"
+
+            - name: Tag commit with version
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                VERSION=${{ steps.get_version.outputs.version }}
+                git tag "v$VERSION"
+                git push origin "v$VERSION"
+
+            - name: Tag commit with version
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                TAG="v${{ steps.get_version.outputs.majorVersion }}"
+                git tag -f $TAG
+                git push origin $TAG --force
