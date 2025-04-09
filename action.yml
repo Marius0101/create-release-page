@@ -5,38 +5,6 @@ branding:
   icon: 'git-pull-request'
   color: 'yellow'
 
-inputs:
-  token:
-    description: "The github token with permisions."
-    required: true
-  title:
-    description: "The pull request title."
-    required: true
-  head:
-    description: "The name of the branch where your changes are implemented."
-    required: true
-  base:
-    description: "The name of the branch you want the changes pulled into."
-    required: true
-  body:
-    description: "The contents of the pull request."
-    required: false
-    default: ""
-  assignees:
-    description: "Adds up to 10 assignees to a pull request."
-    required: false
-    default: ""
-  user_reviewers:
-    description: "A list with users that will be requested for review."
-    required: false
-    default: ""
-  team_reviewers:
-    description: "A list with teams that will be requested for review."
-    required: false
-    default: ""
-outputs: 
-  pr_number:
-    description: The pull request number
 runs:
   using: node20
   main: dist/index.js
