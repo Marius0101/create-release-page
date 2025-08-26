@@ -1,6 +1,5 @@
 import * as github from "@actions/github";
 import * as core from "@actions/core";
-import { brotliDecompress } from "zlib";
 
 const run = async (): Promise<void> =>{
     const inputs:Inputs = await getInputs();
