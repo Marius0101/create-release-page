@@ -1,165 +1,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 4308:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.addReviewersToPR = exports.assigneUsersToPR = exports.createPullRequest = exports.getInputs = void 0;
-const core = __importStar(__nccwpck_require__(7484));
-const github = __importStar(__nccwpck_require__(3228));
-const getInputs = async () => {
-    const getInputList = (inputName) => {
-        const input = core.getInput(inputName);
-        if (input) {
-            return input.split(/\s+/).filter((user) => user !== "");
-        }
-        return undefined;
-    };
-    const inputs = {
-        repo: github.context.repo.repo,
-        owner: github.context.repo.owner,
-        ghToken: core.getInput("token"),
-        title: core.getInput("title"),
-        head: core.getInput("head"),
-        base: core.getInput("base"),
-        body: core.getInput("body"),
-        assignees: getInputList("assignees"),
-        user_reviewers: getInputList("user_reviewers"),
-        team_reviewers: getInputList("team_reviewers"),
-    };
-    if (!inputs.assignees?.length)
-        delete inputs.assignees;
-    if (!inputs.user_reviewers?.length)
-        delete inputs.user_reviewers;
-    if (!inputs.team_reviewers?.length)
-        delete inputs.team_reviewers;
-    return inputs;
-};
-exports.getInputs = getInputs;
-const createPullRequest = async (inputs, octokit) => {
-    core.info("Creating the pull request");
-    try {
-        const response = await octokit.rest.pulls.create({
-            owner: inputs.owner,
-            repo: inputs.repo,
-            head: inputs.head,
-            base: inputs.base,
-            title: inputs.title,
-            body: inputs.body,
-        });
-        core.info(`Pull request created successfully: ${response.data.html_url}`);
-        return response.data.number;
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            const errorMsg = handleRequestError(error);
-            core.setFailed(errorMsg);
-        }
-        else {
-            core.setFailed("Error creating pull request: Unknown error");
-        }
-        process.exit(1);
-    }
-};
-exports.createPullRequest = createPullRequest;
-const assigneUsersToPR = async (inputs, octokit, pr_number) => {
-    core.info(`Assign the following user to the PR: ${inputs.assignees} `);
-    await octokit.rest.issues.addAssignees({
-        repo: inputs.repo,
-        owner: inputs.owner,
-        issue_number: pr_number,
-        assignees: inputs.assignees,
-    });
-    core.info(`The users were assigned successfully.`);
-};
-exports.assigneUsersToPR = assigneUsersToPR;
-const addReviewersToPR = async (inputs, octokit, pr_number) => {
-    try {
-        if (inputs.user_reviewers) {
-            core.info(`Request the following user as reviewers: ${inputs.user_reviewers}`);
-        }
-        if (inputs.team_reviewers) {
-            core.info(`Request the following teams as reviewers: ${inputs.team_reviewers}`);
-        }
-        await octokit.rest.pulls.requestReviewers({
-            repo: inputs.repo,
-            owner: inputs.owner,
-            pull_number: pr_number,
-            reviewers: inputs.user_reviewers,
-            team_reviewers: inputs.team_reviewers,
-        });
-        core.info(`The reviewers were requested successfully.`);
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            const errorMsg = handleRequestError(error);
-            core.setFailed(errorMsg);
-        }
-        else {
-            core.info("Error adding the the reviewers: Unknown error");
-        }
-    }
-};
-exports.addReviewersToPR = addReviewersToPR;
-const handleRequestError = (error) => {
-    const requestErr = error;
-    const data = requestErr.response
-        ?.data;
-    let errorMsg = "Error creating pull request: ";
-    if (data) {
-        errorMsg += `${data.message}\n`;
-        errorMsg += `Status Code: ${data.status}\n`;
-        if (data.errors?.length) {
-            errorMsg +=
-                "Details: " + data.errors.map((e) => e.message).join("\n") + "\n";
-        }
-        errorMsg += `GitHub endpoint documentation: ${data.documentation_url}\n`;
-    }
-    else {
-        errorMsg += "No response data available.";
-    }
-    return errorMsg;
-};
-
-
-/***/ }),
-
 /***/ 8981:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -214,27 +55,81 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
-const common_1 = __nccwpck_require__(4308);
+const core = __importStar(__nccwpck_require__(7484));
 const run = async () => {
-    const inputs = await (0, common_1.getInputs)();
+    const inputs = await getInputs();
     const octokit = github.getOctokit(inputs.ghToken);
-    const pr_number = await (0, common_1.createPullRequest)(inputs, octokit);
-    core.setOutput("pr_number", pr_number);
-    if (inputs.assignees) {
-        await (0, common_1.assigneUsersToPR)(inputs, octokit, pr_number);
+    const changeLogContent = await getChangeLogContent(octokit, inputs);
+    const versionChanges = getVersionChanges(changeLogContent, inputs.build_version, inputs.find_pattern);
+    if (!versionChanges) {
+        core.warning(`No changes found for version ${inputs.build_version}. Release page will be created with empty body.`);
+    }
+    await createReleasePage(octokit, inputs, versionChanges || '');
+};
+const getChangeLogContent = async (octokit, inputs) => {
+    core.info(`Trying to get ${inputs.change_log_file} from the ref ${inputs.tag_name}`);
+    const response = octokit.rest.repos.getContent({
+        owner: inputs.owner,
+        repo: inputs.repo,
+        path: inputs.change_log_file,
+        ref: inputs.tag_name,
+    });
+    if (!response.content) {
+        throw new Error("Unexpected response structure or content missing.");
+    }
+    core.info(`File content get succesfuly`);
+    core.info(`Start decoding the content from base64`);
+    const content = Buffer.from(response.content, 'base64').toString('utf-8');
+    core.info(`Content decoded succesfuly`);
+    return content;
+};
+const getVersionChanges = (changeLogContent, version, findPattern) => {
+    const startPattern = findPattern.replace('{version}', version);
+    const endPattern = findPattern.replace('{version}', `\\\d+\\.\\\d+\\.\\\d+`);
+    let pattern;
+    if (version === '1.0.0') {
+        pattern = `${startPattern}[^]*$`;
     }
     else {
-        core.info("No users assigned to this pull request!");
+        pattern = `${startPattern}[^]*?(?=${endPattern}|$)`;
     }
-    if (inputs.team_reviewers || inputs.user_reviewers) {
-        await (0, common_1.addReviewersToPR)(inputs, octokit, pr_number);
+    const regex = new RegExp(pattern, 'm');
+    const match = changeLogContent.match(regex);
+    if (!match) {
+        core.warning(`Version ${version} not found in the changelog.`);
+        return null;
     }
-    else {
-        core.info("No reviewers added to this pull request!");
+    return match[0].trim();
+};
+const getInputs = async () => {
+    const ref = process.env.GITHUB_REF_NAME;
+    if (!ref) {
+        throw new Error("GITHUB_REF_NAME is not defined in the environment variables.");
     }
-    core.info("do somthing");
+    const inputs = {
+        repo: github.context.repo.repo,
+        owner: github.context.repo.owner,
+        ghToken: core.getInput("token"),
+        tag_name: ref,
+        build_version: core.getInput("build_version"),
+        change_log_file: core.getInput("change_log_file"),
+        name: core.getInput("name") || ref,
+        draft: core.getInput("draft").toLowerCase() === 'true',
+        find_pattern: core.getInput("find_pattern"),
+    };
+    core.info(`The name of the release will be ${inputs.name}`);
+    return inputs;
+};
+const createReleasePage = async (octokit, inputs, body) => {
+    octokit.rest.repos.createRelease({
+        owner: inputs.owner,
+        repo: inputs.repo,
+        tag_name: inputs.tag_name,
+        name: inputs.name,
+        body: body,
+        draft: inputs.draft,
+    });
 };
 exports["default"] = run;
 
