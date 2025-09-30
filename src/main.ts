@@ -7,7 +7,9 @@ const run = async (): Promise<void> =>{
     const inputs:Inputs = await getInputs();
     const octokit = github.getOctokit(inputs.ghToken);
     const changeLogContent: string = await getChangeLogContent(octokit, inputs);
+    core.info(`Change log Content:\n ${changeLogContent}`);
     const versionChanges = getVersionChanges(changeLogContent, inputs.tag_name );
+     core.info(`Version CHANGES Content:\n ${versionChanges}`);
     if(!versionChanges){
         core.warning(`No changes found for tag ${inputs.tag_name}. Release page will be created with empty body.`);
     }
@@ -54,10 +56,7 @@ const getVersionChanges = (changeLogContent: string, tag_name: string): string |
     return match[0].trim();
 }
 const getInputs = async (): Promise<Inputs> => {
-    const ref = process.env.GITHUB_REF_NAME ;
-    if (!ref) {
-        throw new Error("GITHUB_REF_NAME is not defined in the environment variables.");
-    }
+    core.info(`Getting inputs`);
     const inputs: Inputs= {
         repo: github.context.repo.repo,
         owner: github.context.repo.owner,
