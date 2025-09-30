@@ -30,9 +30,9 @@ jobs:
               uses: ./
               with: 
                 token: ${{ secrets.GITHUB_TOKEN }}
-                tag_name: "v1.0.0"
-                change_log_file: "CHANGELOG.md"
-                name: "Release 1.0.0"
+                tag_name: ${{ inputs.tag_name }}
+                change_log_file: ${{ inputs.change_log_file }}
+                name: ${{ inputs.name }}
 
 
                 
