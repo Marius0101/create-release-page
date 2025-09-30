@@ -7,10 +7,13 @@ const run = async (): Promise<void> =>{
     const inputs:Inputs = await getInputs();
     const octokit = github.getOctokit(inputs.ghToken);
     const changeLogContent: string = await getChangeLogContent(octokit, inputs);
-    const versionChanges = getVersionChanges(changeLogContent, inputs.build_version, inputs.find_pattern, );
-    if(!versionChanges){
-        core.warning(`No changes found for version ${inputs.build_version}. Release page will be created with empty body.`);
-    }
+    core.info(`File Content:\n ${changeLogContent}`);
+    const versionChanges = getVersionChanges(changeLogContent, inputs.tag_name );
+    
+    if(!versionChanges)
+        core.warning(`No changes found for tag ${inputs.tag_name}. Release page will be created with empty body.`);
+    else
+        core.info(`Version changes:\n ${versionChanges}`);
     await createReleasePage(octokit, inputs, versionChanges || '');
 }
 
@@ -31,38 +34,37 @@ const getChangeLogContent = async (octokit: InstanceType<typeof GitHub>, inputs:
     core.info(`Content decoded succesfuly`);
     return content;
 };
-const getVersionChanges = (changeLogContent: string, version:string, findPattern: string, ): string|null => {
-    const startPattern:string = findPattern.replace('{version}', version);
-    const endPattern:string = findPattern.replace('{version}', '\\d+\\.\\d+\\.\\d+');
-    let pattern: string;
-    if (version === '1.0.0') {
-        pattern = `${startPattern}[^]*$`;
-    } else {
-        pattern = `${startPattern}[^]*?(?=${endPattern}|$)`;
+const getVersionChanges = (changeLogContent: string, tag_name: string): string | null => {
+    const tag_split = tag_name.match(/^(\D*)(\d+\.\d+\.\d+(?:-[\w\d]+)?)$/);
+    if (tag_split === null) {   
+        console.warn(`Tag name ${tag_name} does not match the expected format.`);
+        return null;
     }
-    const regex = new RegExp(pattern, 'm');
-    const match = changeLogContent.match(regex);
+    const prefix = tag_split[1];
+    const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const versionRegex = /(\d+\.\d+\.\d+(?:-[\w\d]+)?)/g;
+
+    const escapedTag = escapeRegex(tag_name);
+    const pattern = new RegExp(
+        `${escapedTag}[\\s\\S]*?(?=${escapeRegex(prefix)}${versionRegex.source}|$)`,
+    )
+    const match = changeLogContent.match(pattern, );
     if (!match) {
-        core.warning(`Version ${version} not found in the changelog.`);
+        console.warn(`Version ${tag_name} not found in the changelog.`);
         return null;
     }
     return match[0].trim();
 }
 const getInputs = async (): Promise<Inputs> => {
-    const ref = process.env.GITHUB_REF_NAME ;
-    if (!ref) {
-        throw new Error("GITHUB_REF_NAME is not defined in the environment variables.");
-    }
+    core.info(`Getting inputs`);
     const inputs: Inputs= {
         repo: github.context.repo.repo,
         owner: github.context.repo.owner,
         ghToken: core.getInput("token"),
-        tag_name : ref,
-        build_version: core.getInput("build_version"),
+        tag_name : core.getInput("tag_name"),
         change_log_file: core.getInput("change_log_file"),
-        name: core.getInput("name") || ref,
-        draft: core.getInput("draft").toLowerCase() === 'true',
-        find_pattern: core.getInput("find_pattern"),
+        name: core.getInput("name") || core.getInput("tag_name"),
+        draft: core.getInput("draft").toLowerCase() === 'true'
     }
     core.info(`The name of the release will be ${inputs.name}`);
     return inputs;

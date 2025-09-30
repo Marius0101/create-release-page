@@ -8,8 +8,8 @@ inputs:
   token:
     description: "The github token with permisions."
     required: true
-  build_version:
-    description: "The version of the build."
+  tag_name:
+    description: "The tag name of the release."
     required: true
   change_log_file:
     description: "The file where the change log are writed."
@@ -17,10 +17,6 @@ inputs:
   name: 
     description: "The name of the release."
     required: false
-  find_pattern:
-    description: "The pattern to find the version in the change log file."
-    required: false
-    default: "v{version}"
   draft:
     description: "If the release is a draft or not."
     required: false
