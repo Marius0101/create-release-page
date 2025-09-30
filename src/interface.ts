@@ -1,4 +1,4 @@
-interface Inputs {
+export interface Inputs {
     repo: string;
     owner: string;
     ghToken: string;
