@@ -1,5 +1,7 @@
 import * as github from "@actions/github";
 import * as core from "@actions/core";
+import {Inputs} from "./interface";
+import { GitHub } from "@actions/github/lib/utils";
 
 const run = async (): Promise<void> =>{
     const inputs:Inputs = await getInputs();
@@ -12,26 +14,26 @@ const run = async (): Promise<void> =>{
     await createReleasePage(octokit, inputs, versionChanges || '');
 }
 
-const getChangeLogContent = async (octokit: any, inputs: Inputs): Promise<string> => {
+const getChangeLogContent = async (octokit: InstanceType<typeof GitHub>, inputs: Inputs): Promise<string> => {
     core.info(`Trying to get ${inputs.change_log_file} from the ref ${inputs.tag_name}`);
-    const response = octokit.rest.repos.getContent({
+    const response = await octokit.rest.repos.getContent({
         owner: inputs.owner,
         repo: inputs.repo,
         path: inputs.change_log_file,
         ref: inputs.tag_name,
     });
-    if(!response.content){
-        throw new Error("Unexpected response structure or content missing.");
-    }
+    if (!("content" in response.data)) {
+    throw new Error("The requested path is not a file or content is missing.");
+  }
     core.info(`File content get succesfuly`);
     core.info(`Start decoding the content from base64`);
-    const content = Buffer.from(response.content, 'base64').toString('utf-8');
+    const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
     core.info(`Content decoded succesfuly`);
     return content;
 };
 const getVersionChanges = (changeLogContent: string, version:string, findPattern: string, ): string|null => {
     const startPattern:string = findPattern.replace('{version}', version);
-    const endPattern:string = findPattern.replace('{version}', `\\\d+\\.\\\d+\\.\\\d+`);
+    const endPattern:string = findPattern.replace('{version}', '\\d+\\.\\d+\\.\\d+');
     let pattern: string;
     if (version === '1.0.0') {
         pattern = `${startPattern}[^]*$`;
@@ -65,8 +67,8 @@ const getInputs = async (): Promise<Inputs> => {
     core.info(`The name of the release will be ${inputs.name}`);
     return inputs;
 }
-const createReleasePage = async (octokit: any, inputs: Inputs, body: string): Promise<void> => {
-    octokit.rest.repos.createRelease({
+const createReleasePage = async (octokit: InstanceType<typeof GitHub>, inputs: Inputs, body: string): Promise<void> => {
+    await octokit.rest.repos.createRelease({
     owner:inputs.owner,
     repo:inputs.repo,
     tag_name: inputs.tag_name,

@@ -69,24 +69,24 @@ const run = async () => {
 };
 const getChangeLogContent = async (octokit, inputs) => {
     core.info(`Trying to get ${inputs.change_log_file} from the ref ${inputs.tag_name}`);
-    const response = octokit.rest.repos.getContent({
+    const response = await octokit.rest.repos.getContent({
         owner: inputs.owner,
         repo: inputs.repo,
         path: inputs.change_log_file,
         ref: inputs.tag_name,
     });
-    if (!response.content) {
-        throw new Error("Unexpected response structure or content missing.");
+    if (!("content" in response.data)) {
+        throw new Error("The requested path is not a file or content is missing.");
     }
     core.info(`File content get succesfuly`);
     core.info(`Start decoding the content from base64`);
-    const content = Buffer.from(response.content, 'base64').toString('utf-8');
+    const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
     core.info(`Content decoded succesfuly`);
     return content;
 };
 const getVersionChanges = (changeLogContent, version, findPattern) => {
     const startPattern = findPattern.replace('{version}', version);
-    const endPattern = findPattern.replace('{version}', `\\\d+\\.\\\d+\\.\\\d+`);
+    const endPattern = findPattern.replace('{version}', '\\d+\\.\\d+\\.\\d+');
     let pattern;
     if (version === '1.0.0') {
         pattern = `${startPattern}[^]*$`;
@@ -122,7 +122,7 @@ const getInputs = async () => {
     return inputs;
 };
 const createReleasePage = async (octokit, inputs, body) => {
-    octokit.rest.repos.createRelease({
+    await octokit.rest.repos.createRelease({
         owner: inputs.owner,
         repo: inputs.repo,
         tag_name: inputs.tag_name,
