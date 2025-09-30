@@ -96,7 +96,7 @@ const getVersionChanges = (changeLogContent, tag_name) => {
     const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const versionRegex = /(\d+\.\d+\.\d+(?:-[\w\d]+)?)/g;
     const escapedTag = escapeRegex(tag_name);
-    const pattern = new RegExp(`${escapedTag}[\\s\\S]*?(?=${escapeRegex(prefix)}${versionRegex.source}|$)`, 'm');
+    const pattern = new RegExp(`${escapedTag}[\\s\\S]*?(?=${escapeRegex(prefix)}${versionRegex.source}|$)`);
     const match = changeLogContent.match(pattern);
     if (!match) {
         console.warn(`Version ${tag_name} not found in the changelog.`);
