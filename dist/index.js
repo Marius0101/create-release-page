@@ -61,12 +61,12 @@ const run = async () => {
     const inputs = await getInputs();
     const octokit = github.getOctokit(inputs.ghToken);
     const changeLogContent = await getChangeLogContent(octokit, inputs);
-    core.info(`Change log Content:\n ${changeLogContent}`);
+    core.info(`File Content:\n ${changeLogContent}`);
     const versionChanges = getVersionChanges(changeLogContent, inputs.tag_name);
-    core.info(`Version CHANGES Content:\n ${versionChanges}`);
-    if (!versionChanges) {
+    if (!versionChanges)
         core.warning(`No changes found for tag ${inputs.tag_name}. Release page will be created with empty body.`);
-    }
+    else
+        core.info(`Version changes:\n ${versionChanges}`);
     await createReleasePage(octokit, inputs, versionChanges || '');
 };
 const getChangeLogContent = async (octokit, inputs) => {
