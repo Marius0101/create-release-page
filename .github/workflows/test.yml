@@ -17,7 +17,7 @@ jobs:
               uses: ./
               with: 
                 token: ${{ secrets.GITHUB_TOKEN }}
-                build_version: "1.0.0"
+                build_version: "v1.0.0"
                 change_log_file: "CHANGELOG.md"
                 name: "Release 1.0.0"
 
