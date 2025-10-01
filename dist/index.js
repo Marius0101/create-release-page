@@ -1,6 +1,67 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 4308:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getInputs = void 0;
+const core = __importStar(__nccwpck_require__(7484));
+const github = __importStar(__nccwpck_require__(3228));
+const getInputs = async () => {
+    core.info(`Getting inputs`);
+    const inputs = {
+        repo: github.context.repo.repo,
+        owner: github.context.repo.owner,
+        ghToken: core.getInput("token"),
+        tag_name: core.getInput("tag_name"),
+        change_log_file: core.getInput("change_log_file"),
+        name: core.getInput("name") || core.getInput("tag_name"),
+        draft: core.getInput("draft").toLowerCase() === 'true'
+    };
+    core.info(`The name of the release will be ${inputs.name}`);
+    return inputs;
+};
+exports.getInputs = getInputs;
+
+
+/***/ }),
+
 /***/ 8981:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -57,8 +118,9 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const github = __importStar(__nccwpck_require__(3228));
 const core = __importStar(__nccwpck_require__(7484));
+const common_1 = __nccwpck_require__(4308);
 const run = async () => {
-    const inputs = await getInputs();
+    const inputs = await (0, common_1.getInputs)();
     const octokit = github.getOctokit(inputs.ghToken);
     const changeLogContent = await getChangeLogContent(octokit, inputs);
     core.info(`File Content:\n ${changeLogContent}`);
@@ -103,20 +165,6 @@ const getVersionChanges = (changeLogContent, tag_name) => {
         return null;
     }
     return match[0].trim();
-};
-const getInputs = async () => {
-    core.info(`Getting inputs`);
-    const inputs = {
-        repo: github.context.repo.repo,
-        owner: github.context.repo.owner,
-        ghToken: core.getInput("token"),
-        tag_name: core.getInput("tag_name"),
-        change_log_file: core.getInput("change_log_file"),
-        name: core.getInput("name") || core.getInput("tag_name"),
-        draft: core.getInput("draft").toLowerCase() === 'true'
-    };
-    core.info(`The name of the release will be ${inputs.name}`);
-    return inputs;
 };
 const createReleasePage = async (octokit, inputs, body) => {
     await octokit.rest.repos.createRelease({

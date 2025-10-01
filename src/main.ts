@@ -2,6 +2,7 @@ import * as github from "@actions/github";
 import * as core from "@actions/core";
 import {Inputs} from "./interface";
 import { GitHub } from "@actions/github/lib/utils";
+import {getInputs} from "./common";
 
 const run = async (): Promise<void> =>{
     const inputs:Inputs = await getInputs();
@@ -55,20 +56,7 @@ const getVersionChanges = (changeLogContent: string, tag_name: string): string |
     }
     return match[0].trim();
 }
-const getInputs = async (): Promise<Inputs> => {
-    core.info(`Getting inputs`);
-    const inputs: Inputs= {
-        repo: github.context.repo.repo,
-        owner: github.context.repo.owner,
-        ghToken: core.getInput("token"),
-        tag_name : core.getInput("tag_name"),
-        change_log_file: core.getInput("change_log_file"),
-        name: core.getInput("name") || core.getInput("tag_name"),
-        draft: core.getInput("draft").toLowerCase() === 'true'
-    }
-    core.info(`The name of the release will be ${inputs.name}`);
-    return inputs;
-}
+
 const createReleasePage = async (octokit: InstanceType<typeof GitHub>, inputs: Inputs, body: string): Promise<void> => {
     await octokit.rest.repos.createRelease({
     owner:inputs.owner,
