@@ -5,17 +5,17 @@ const config: Config = {
   testEnvironment: "node",
   extensionsToTreatAsEsm: [".ts"],
   transform: {
-    "^.+\\.tsx?$": [
-      "ts-jest",
-      {
-        useESM: true,
-      },
-    ],
+    "^.+\\.tsx?$": ["ts-jest",{useESM: true,},],
+    '^.+\\.js$': ['ts-jest', { useESM: true }]
   },
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
-  testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$"
+  moduleFileExtensions: ['ts', 'js'],
+  testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
+  transformIgnorePatterns: [
+    '/node_modules/(?!@octokit/request-error/)'
+  ]
 };
 
 export default config;

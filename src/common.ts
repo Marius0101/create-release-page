@@ -3,6 +3,9 @@ import * as github from "@actions/github";
 import { GitHub } from "@actions/github/lib/utils";
 import {Inputs} from "./interface";
 import { RequestError } from "@octokit/request-error";
+import { OctokitHttpError } from "./temp_lib/models";
+import { isOctokitHttpError } from "./temp_lib/validate";
+import { toOctokitError } from "./temp_lib/convert";
 
 const getInputs = async (): Promise<Inputs> => {
     core.info(`Getting inputs`);
@@ -18,7 +21,7 @@ const getInputs = async (): Promise<Inputs> => {
     core.info(`The name of the release will be ${inputs.name}`);
     return inputs;
 }
-const getChangeLogContent = async (octokit: InstanceType<typeof GitHub>, inputs: Inputs): Promise<string> => {
+const getChangeLogContent = async (octokit: InstanceType<typeof GitHub>, inputs: Inputs): Promise<string|undefined> => {
     core.info(`Trying to get ${inputs.change_log_file} from the ref ${inputs.tag_name}`);
     try {
         const response = await octokit.rest.repos.getContent({
@@ -37,16 +40,19 @@ const getChangeLogContent = async (octokit: InstanceType<typeof GitHub>, inputs:
         core.info(`Content decoded succesfuly`);
         return content;
     } catch (error) {
-        if (error instanceof RequestError) {
-            var erro1 = handleRequestError(error);
-            core.setFailed(erro1);
+        if (isOctokitHttpError(error)) {
+            // var erro1 = handleRequestError(error);
+            var error1:OctokitHttpError = toOctokitError(error);
+            handleOctokitHttpError(error1);
+            core.setFailed("erro1");
         }
         else 
+            console.log(typeof error);
             core.setFailed("Error creating pull request: Unknown error");
-        process.exit(1);
+        return undefined;
     };
 }
-const handleRequestError = (error: RequestError): string => {
+const handleOctokitHttpError = (error: OctokitHttpError): string => {
     let errorMsg = "Error creating the release: ";
     if (error) {
         errorMsg += `${error.message}\n`;
