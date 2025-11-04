@@ -2,7 +2,7 @@ import * as github from "@actions/github";
 import * as core from "@actions/core";
 import {Inputs} from "./interface";
 import { GitHub } from "@actions/github/lib/utils";
-import {getInputs} from "./common";
+import {getInputs, getChangeLogContent} from "./common";
 
 const run = async (): Promise<void> =>{
     const inputs:Inputs = await getInputs();
@@ -18,23 +18,6 @@ const run = async (): Promise<void> =>{
     await createReleasePage(octokit, inputs, versionChanges || '');
 }
 
-const getChangeLogContent = async (octokit: InstanceType<typeof GitHub>, inputs: Inputs): Promise<string> => {
-    core.info(`Trying to get ${inputs.change_log_file} from the ref ${inputs.tag_name}`);
-    const response = await octokit.rest.repos.getContent({
-        owner: inputs.owner,
-        repo: inputs.repo,
-        path: inputs.change_log_file,
-        ref: inputs.tag_name,
-    });
-    if (!("content" in response.data)) {
-    throw new Error("The requested path is not a file or content is missing.");
-  }
-    core.info(`File content get succesfuly`);
-    core.info(`Start decoding the content from base64`);
-    const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
-    core.info(`Content decoded succesfuly`);
-    return content;
-};
 const getVersionChanges = (changeLogContent: string, tag_name: string): string | null => {
     const tag_split = tag_name.match(/^(\D*)(\d+\.\d+\.\d+(?:-[\w\d]+)?)$/);
     if (tag_split === null) {   

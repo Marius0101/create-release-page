@@ -1,12 +1,9 @@
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 import { Inputs } from "../src/interface";
-import { getInputs } from "../src/common";
+import { getChangeLogContent, getInputs } from "../src/common";
 
-type TestCase = {
-  input: any;
-  expected: Inputs;
-};
+
 type TestCaseLogs = {
   input: any;
   expected: string[];
@@ -14,6 +11,10 @@ type TestCaseLogs = {
 describe("common.getInputs", () => {
     //#region Variables
     let inputs = {} as any;
+    type TestCase = {
+        input: any;
+        expected: Inputs;
+    };
     const baseInput = {
         token: "testToken",
         tag_name: "v1.0.0",
@@ -120,4 +121,29 @@ describe("common.getInputs", () => {
         });
     });
     //#endregion
+});
+// invalid token
+// missing file
+// no access to repo
+// file is not base64 encoded
+// file is empty
+// file is a directory
+// file is too large
+// empty path
+// file is submodule
+// file is symlink
+// Branch does not exist
+// request failures
+describe("common.getChangeLogContent", () => {
+    it("placeholder", async () => {
+        const octokit = github.getOctokit("testToken");
+        const inputs: Inputs = {
+            owner: "testOwner",
+            repo: "testRepo",
+            ghToken: "testToken",
+            tag_name: "v1.0.0",
+            change_log_file: "CHANGELOG.md",}
+        var test = await getChangeLogContent(octokit, inputs);
+        expect(test).toBeDefined();
+    })
 });

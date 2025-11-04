@@ -1,3 +1,4 @@
+import { createRequire as __WEBPACK_EXTERNAL_createRequire } from "module";
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -40,9 +41,10 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getInputs = void 0;
+exports.getChangeLogContent = exports.getInputs = void 0;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
+const request_error_1 = __nccwpck_require__(1015);
 const getInputs = async () => {
     core.info(`Getting inputs`);
     const inputs = {
@@ -58,6 +60,46 @@ const getInputs = async () => {
     return inputs;
 };
 exports.getInputs = getInputs;
+const getChangeLogContent = async (octokit, inputs) => {
+    core.info(`Trying to get ${inputs.change_log_file} from the ref ${inputs.tag_name}`);
+    try {
+        const response = await octokit.rest.repos.getContent({
+            owner: inputs.owner,
+            repo: inputs.repo,
+            path: inputs.change_log_file,
+            ref: inputs.tag_name,
+        });
+        if (!("content" in response.data)) {
+            core.setFailed("The requested path is not a file or content is missing.");
+            process.exit(1);
+        }
+        core.info(`File content get succesfuly`);
+        core.info(`Start decoding the content from base64`);
+        const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
+        core.info(`Content decoded succesfuly`);
+        return content;
+    }
+    catch (error) {
+        if (error instanceof request_error_1.RequestError) {
+            var erro1 = handleRequestError(error);
+            core.setFailed(erro1);
+        }
+        else
+            core.setFailed("Error creating pull request: Unknown error");
+        process.exit(1);
+    }
+    ;
+};
+exports.getChangeLogContent = getChangeLogContent;
+const handleRequestError = (error) => {
+    let errorMsg = "Error creating the release: ";
+    if (error) {
+        errorMsg += `${error.message}\n`;
+        errorMsg += `Status Code: ${error.status}\n`;
+        return errorMsg;
+    }
+    return errorMsg;
+};
 
 
 /***/ }),
@@ -122,7 +164,7 @@ const common_1 = __nccwpck_require__(4308);
 const run = async () => {
     const inputs = await (0, common_1.getInputs)();
     const octokit = github.getOctokit(inputs.ghToken);
-    const changeLogContent = await getChangeLogContent(octokit, inputs);
+    const changeLogContent = await (0, common_1.getChangeLogContent)(octokit, inputs);
     core.info(`File Content:\n ${changeLogContent}`);
     const versionChanges = getVersionChanges(changeLogContent, inputs.tag_name);
     if (!versionChanges)
@@ -130,23 +172,6 @@ const run = async () => {
     else
         core.info(`Version changes:\n ${versionChanges}`);
     await createReleasePage(octokit, inputs, versionChanges || '');
-};
-const getChangeLogContent = async (octokit, inputs) => {
-    core.info(`Trying to get ${inputs.change_log_file} from the ref ${inputs.tag_name}`);
-    const response = await octokit.rest.repos.getContent({
-        owner: inputs.owner,
-        repo: inputs.repo,
-        path: inputs.change_log_file,
-        ref: inputs.tag_name,
-    });
-    if (!("content" in response.data)) {
-        throw new Error("The requested path is not a file or content is missing.");
-    }
-    core.info(`File content get succesfuly`);
-    core.info(`Start decoding the content from base64`);
-    const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
-    core.info(`Content decoded succesfuly`);
-    return content;
 };
 const getVersionChanges = (changeLogContent, tag_name) => {
     const tag_split = tag_name.match(/^(\D*)(\d+\.\d+\.\d+(?:-[\w\d]+)?)$/);
@@ -30098,7 +30123,7 @@ function wrappy (fn, cb) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("assert");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("assert");
 
 /***/ }),
 
@@ -30106,7 +30131,7 @@ module.exports = require("assert");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("async_hooks");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("async_hooks");
 
 /***/ }),
 
@@ -30114,7 +30139,7 @@ module.exports = require("async_hooks");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("buffer");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("buffer");
 
 /***/ }),
 
@@ -30122,7 +30147,7 @@ module.exports = require("buffer");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("child_process");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("child_process");
 
 /***/ }),
 
@@ -30130,7 +30155,7 @@ module.exports = require("child_process");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("console");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("console");
 
 /***/ }),
 
@@ -30138,7 +30163,7 @@ module.exports = require("console");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("crypto");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("crypto");
 
 /***/ }),
 
@@ -30146,7 +30171,7 @@ module.exports = require("crypto");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("diagnostics_channel");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("diagnostics_channel");
 
 /***/ }),
 
@@ -30154,7 +30179,7 @@ module.exports = require("diagnostics_channel");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("events");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("events");
 
 /***/ }),
 
@@ -30162,7 +30187,7 @@ module.exports = require("events");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("fs");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs");
 
 /***/ }),
 
@@ -30170,7 +30195,7 @@ module.exports = require("fs");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("http");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("http");
 
 /***/ }),
 
@@ -30178,7 +30203,7 @@ module.exports = require("http");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("http2");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("http2");
 
 /***/ }),
 
@@ -30186,7 +30211,7 @@ module.exports = require("http2");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("https");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("https");
 
 /***/ }),
 
@@ -30194,7 +30219,7 @@ module.exports = require("https");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("net");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("net");
 
 /***/ }),
 
@@ -30202,7 +30227,7 @@ module.exports = require("net");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("node:crypto");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:crypto");
 
 /***/ }),
 
@@ -30210,7 +30235,7 @@ module.exports = require("node:crypto");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("node:events");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:events");
 
 /***/ }),
 
@@ -30218,7 +30243,7 @@ module.exports = require("node:events");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("node:stream");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:stream");
 
 /***/ }),
 
@@ -30226,7 +30251,7 @@ module.exports = require("node:stream");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("node:util");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:util");
 
 /***/ }),
 
@@ -30234,7 +30259,7 @@ module.exports = require("node:util");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("os");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("os");
 
 /***/ }),
 
@@ -30242,7 +30267,7 @@ module.exports = require("os");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("path");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("path");
 
 /***/ }),
 
@@ -30250,7 +30275,7 @@ module.exports = require("path");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("perf_hooks");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("perf_hooks");
 
 /***/ }),
 
@@ -30258,7 +30283,7 @@ module.exports = require("perf_hooks");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("querystring");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("querystring");
 
 /***/ }),
 
@@ -30266,7 +30291,7 @@ module.exports = require("querystring");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("stream");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("stream");
 
 /***/ }),
 
@@ -30274,7 +30299,7 @@ module.exports = require("stream");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("stream/web");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("stream/web");
 
 /***/ }),
 
@@ -30282,7 +30307,7 @@ module.exports = require("stream/web");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("string_decoder");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("string_decoder");
 
 /***/ }),
 
@@ -30290,7 +30315,7 @@ module.exports = require("string_decoder");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("timers");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("timers");
 
 /***/ }),
 
@@ -30298,7 +30323,7 @@ module.exports = require("timers");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("tls");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("tls");
 
 /***/ }),
 
@@ -30306,7 +30331,7 @@ module.exports = require("tls");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("url");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("url");
 
 /***/ }),
 
@@ -30314,7 +30339,7 @@ module.exports = require("url");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("util");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("util");
 
 /***/ }),
 
@@ -30322,7 +30347,7 @@ module.exports = require("util");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("util/types");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("util/types");
 
 /***/ }),
 
@@ -30330,7 +30355,7 @@ module.exports = require("util/types");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("worker_threads");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("worker_threads");
 
 /***/ }),
 
@@ -30338,7 +30363,7 @@ module.exports = require("worker_threads");
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("zlib");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("zlib");
 
 /***/ }),
 
@@ -31965,6 +31990,56 @@ function parseParams (str) {
 module.exports = parseParams
 
 
+/***/ }),
+
+/***/ 1015:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   RequestError: () => (/* binding */ RequestError)
+/* harmony export */ });
+class RequestError extends Error {
+  name;
+  /**
+   * http status code
+   */
+  status;
+  /**
+   * Request options that lead to the error.
+   */
+  request;
+  /**
+   * Response object if a response was received
+   */
+  response;
+  constructor(message, statusCode, options) {
+    super(message);
+    this.name = "HttpError";
+    this.status = Number.parseInt(statusCode);
+    if (Number.isNaN(this.status)) {
+      this.status = 0;
+    }
+    if ("response" in options) {
+      this.response = options.response;
+    }
+    const requestCopy = Object.assign({}, options.request);
+    if (options.request.headers.authorization) {
+      requestCopy.headers = Object.assign({}, options.request.headers, {
+        authorization: options.request.headers.authorization.replace(
+          /(?<! ) .*$/,
+          " [REDACTED]"
+        )
+      });
+    }
+    requestCopy.url = requestCopy.url.replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]").replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
+    this.request = requestCopy;
+  }
+}
+
+
+
 /***/ })
 
 /******/ 	});
@@ -32000,6 +32075,34 @@ module.exports = parseParams
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
