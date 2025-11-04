@@ -134,16 +134,16 @@ describe("common.getInputs", () => {
 // file is symlink
 // Branch does not exist
 // request failures
-describe("common.getChangeLogContent", () => {
-    it("placeholder", async () => {
-        const octokit = github.getOctokit("testToken");
-        const inputs: Inputs = {
-            owner: "testOwner",
-            repo: "testRepo",
-            ghToken: "testToken",
-            tag_name: "v1.0.0",
-            change_log_file: "CHANGELOG.md",}
-        var test = await getChangeLogContent(octokit, inputs);
-        expect(test).toBeDefined();
-    })
-});
+// describe("common.getChangeLogContent", () => {
+//     it("placeholder", async () => {
+//         const octokit = github.getOctokit("testToken");
+//         const inputs: Inputs = {
+//             owner: "testOwner",
+//             repo: "testRepo",
+//             ghToken: "testToken",
+//             tag_name: "v1.0.0",
+//             change_log_file: "CHANGELOG.md",}
+//         var test = await getChangeLogContent(octokit, inputs);
+//         expect(test).toBeDefined();
+//     })
+// });

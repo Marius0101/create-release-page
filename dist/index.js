@@ -31786,6 +31786,56 @@ function parseParams (str) {
 module.exports = parseParams
 
 
+/***/ }),
+
+/***/ 1015:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   RequestError: () => (/* binding */ RequestError)
+/* harmony export */ });
+class RequestError extends Error {
+  name;
+  /**
+   * http status code
+   */
+  status;
+  /**
+   * Request options that lead to the error.
+   */
+  request;
+  /**
+   * Response object if a response was received
+   */
+  response;
+  constructor(message, statusCode, options) {
+    super(message);
+    this.name = "HttpError";
+    this.status = Number.parseInt(statusCode);
+    if (Number.isNaN(this.status)) {
+      this.status = 0;
+    }
+    if ("response" in options) {
+      this.response = options.response;
+    }
+    const requestCopy = Object.assign({}, options.request);
+    if (options.request.headers.authorization) {
+      requestCopy.headers = Object.assign({}, options.request.headers, {
+        authorization: options.request.headers.authorization.replace(
+          /(?<! ) .*$/,
+          " [REDACTED]"
+        )
+      });
+    }
+    requestCopy.url = requestCopy.url.replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]").replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
+    this.request = requestCopy;
+  }
+}
+
+
+
 /***/ })
 
 /******/ 	});
@@ -31821,132 +31871,45 @@ module.exports = parseParams
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var github = __nccwpck_require__(3228);
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(7484);
-;// CONCATENATED MODULE: ./lib/src/common.js
-
-
-const getInputs = async () => {
-    core.info(`Getting inputs`);
-    const inputs = {
-        repo: github.context.repo.repo,
-        owner: github.context.repo.owner,
-        ghToken: core.getInput("token"),
-        tag_name: core.getInput("tag_name"),
-        change_log_file: core.getInput("change_log_file"),
-        name: core.getInput("name") || core.getInput("tag_name"),
-        draft: core.getInput("draft").toLowerCase() === 'true'
-    };
-    core.info(`The name of the release will be ${inputs.name}`);
-    return inputs;
-};
-const getChangeLogContent = async (octokit, inputs) => {
-    core.info(`Trying to get ${inputs.change_log_file} from the ref ${inputs.tag_name}`);
-    try {
-        const response = await octokit.rest.repos.getContent({
-            owner: inputs.owner,
-            repo: inputs.repo,
-            path: inputs.change_log_file,
-            ref: inputs.tag_name,
-        });
-        if (!("content" in response.data)) {
-            core.setFailed("The requested path is not a file or content is missing.");
-            process.exit(1);
-        }
-        core.info(`File content get succesfuly`);
-        core.info(`Start decoding the content from base64`);
-        const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
-        core.info(`Content decoded succesfuly`);
-        return content;
-    }
-    catch (error) {
-        const err = error;
-        // if (error instanceof ) {
-        //     // var erro1 = handleRequestError(error);
-        //     core.setFailed("erro1");
-        // }
-        // else 
-        //     console.log(typeof error);
-        //     core.setFailed("Error creating pull request: Unknown error");
-        process.exit(1);
-    }
-    ;
-};
-const handleRequestError = (error) => {
-    let errorMsg = "Error creating the release: ";
-    if (error) {
-        errorMsg += `${error.message}\n`;
-        errorMsg += `Status Code: ${error.status}\n`;
-        return errorMsg;
-    }
-    return errorMsg;
-};
-
-
-;// CONCATENATED MODULE: ./lib/src/main.js
-
-
-
-const run = async () => {
-    const inputs = await getInputs();
-    const octokit = github.getOctokit(inputs.ghToken);
-    const changeLogContent = await getChangeLogContent(octokit, inputs);
-    core.info(`File Content:\n ${changeLogContent}`);
-    const versionChanges = getVersionChanges(changeLogContent, inputs.tag_name);
-    if (!versionChanges)
-        core.warning(`No changes found for tag ${inputs.tag_name}. Release page will be created with empty body.`);
-    else
-        core.info(`Version changes:\n ${versionChanges}`);
-    await createReleasePage(octokit, inputs, versionChanges || '');
-};
-const getVersionChanges = (changeLogContent, tag_name) => {
-    const tag_split = tag_name.match(/^(\D*)(\d+\.\d+\.\d+(?:-[\w\d]+)?)$/);
-    if (tag_split === null) {
-        console.warn(`Tag name ${tag_name} does not match the expected format.`);
-        return null;
-    }
-    const prefix = tag_split[1];
-    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const versionRegex = /(\d+\.\d+\.\d+(?:-[\w\d]+)?)/g;
-    const escapedTag = escapeRegex(tag_name);
-    const pattern = new RegExp(`${escapedTag}[\\s\\S]*?(?=${escapeRegex(prefix)}${versionRegex.source}|$)`);
-    const match = changeLogContent.match(pattern);
-    if (!match) {
-        console.warn(`Version ${tag_name} not found in the changelog.`);
-        return null;
-    }
-    return match[0].trim();
-};
-const createReleasePage = async (octokit, inputs, body) => {
-    await octokit.rest.repos.createRelease({
-        owner: inputs.owner,
-        repo: inputs.repo,
-        tag_name: inputs.tag_name,
-        name: inputs.name,
-        body: body,
-        draft: inputs.draft,
-    });
-};
-/* harmony default export */ const main = (run);
-
-;// CONCATENATED MODULE: ./lib/src/index.js
-
-main();
-
-})();
-
-module.exports = __webpack_exports__;
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(8981);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;
